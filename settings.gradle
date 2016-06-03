@@ -1,0 +1,4 @@
+include ':app', ':itextg-5.5.9', ':itextg-5.5.3'
+include ':openCVLibrary2410'
+include ':libraries:tess-two'
+
