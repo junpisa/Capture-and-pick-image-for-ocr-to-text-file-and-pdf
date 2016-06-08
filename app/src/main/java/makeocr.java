@@ -1,9 +1,10 @@
-package com.example.toonz.video;
+package com.example.toonz.testopencv;
+
+
 
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -14,14 +15,23 @@ import android.widget.Toast;
 
 import com.googlecode.tesseract.android.TessBaseAPI;
 
-import java.io.ByteArrayOutputStream;
+import org.opencv.android.Utils;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
+import org.opencv.highgui.Highgui;
+import org.opencv.imgproc.Imgproc;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.List;
 
 public class makeocr extends Activity {
+    private List <MatOfPoint> lContours = new ArrayList<MatOfPoint>();
+    Mat rgb_img,gray_img,thres_img,thres_img2,cont_img,rgb_img2;
+
     String ty = "";
     String str;
     Bundle bundle;
@@ -88,9 +98,18 @@ public class makeocr extends Activity {
         for(int i=0;i<name.size();i++){
             Toast.makeText(getApplicationContext(), "pathpic"+name.get(i).toString(), Toast.LENGTH_LONG).show();
             File photoPath = new File(name.get(i).toString());
-            Bitmap bmp = BitmapFactory.decodeFile(photoPath.getAbsolutePath());
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            bmp.compress(Bitmap.CompressFormat.PNG, 100, out);
+
+            gray_img = new Mat();
+            gray_img = Highgui.imread(photoPath.getAbsolutePath(), Highgui.CV_LOAD_IMAGE_GRAYSCALE);
+            Mat re = new Mat();
+            Imgproc.adaptiveThreshold(gray_img, re, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 15, 40);
+            Bitmap bmp = Bitmap.createBitmap(gray_img.width(), gray_img.height(), Bitmap.Config.ARGB_8888);
+            Utils.matToBitmap(re, bmp);
+
+
+            //Bitmap bmp = BitmapFactory.decodeFile(photoPath.getAbsolutePath());
+            //ByteArrayOutputStream out = new ByteArrayOutputStream();
+            //bmp.compress(Bitmap.CompressFormat.PNG, 100, out);
             /////tesseract ocr
             File DATA_PATH = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+ File.separator+"tesseract");
             TessBaseAPI baseApi = new TessBaseAPI();
@@ -102,4 +121,6 @@ public class makeocr extends Activity {
         return recognizedText;
     }
 
+
 }
+
